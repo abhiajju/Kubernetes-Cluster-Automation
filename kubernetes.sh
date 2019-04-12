@@ -322,10 +322,17 @@ yum install virt-viewer -y
 cluster=`sshpass -p 'redhat'  ssh $master  'kubeadm init --pod-network-cidr=172.24.0.0/16'`
 echo $cluster
 echo $cluster  > /root/output.txt
-sleep 10
+cat output.txt  | tail -c 168  > a.sh 
+`sshpass -p  'redhat' scp -o StrictHostKeyChecking=no a.sh root@$node1:/root/`
+`sshpass -p  'redhat' scp -o StrictHostKeyChecking=no a.sh root@$node2:/root/`
+`sshpass -p  'redhat' ssh $node1 'bash /root/a.sh'`
+`sshpass -p  'redhat' ssh $node2 'bash /root/a.sh'`
 
 `sshpass -p 'redhat'  ssh $master  'mkdir /root/.kube'`
 `sshpass -p 'redhat'  ssh $master  'cp -i /etc/kubernetes/admin.conf  /root/.kube/config'`
+`sshpass -p 'redhat'  ssh $master  'kubectl apply -f https://docs.projectcalico.org/v3.3/getting-started/kubernetes/installation/hosted/rbac-kdd.yaml'`
+`sshpass -p 'redhat'  ssh $master  'kubectl apply -f https://docs.projectcalico.org/v3.3/getting-started/kubernetes/installation/hosted/kubernetes-datastore/calico-networking/1.7/calico.yaml'`
+
 echo "
 ##############################################################################
 #      Your kubernetes cluster is ready, you can use it now 	             #
